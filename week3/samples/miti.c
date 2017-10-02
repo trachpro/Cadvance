@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include<ctype.h>
+#include<ncurses.h>
 
 #include "btree.h"
 
@@ -24,7 +25,7 @@ void readFile(BTA *root) {
         while(fgetc(f) != '-' && !feof(f));
         if(!feof) break;
         fscanf(f,"%[^\n]",v);
-        btins(root, v, a, 1800);
+        btins(root, a, v, 1800);
     }
 
     fclose(f);
@@ -48,16 +49,24 @@ void searchByName(BTA *root) {
     char word[15];
     int i, rsize, flag = 0;
     printf("enter the word: ");
-    scanf("%[^\n]",word); scanf("%*c");
+    int c;
+    do {
+        c = getchar();
+    }while(c != '\n' && c!= '\t');
+    // scanf("%[^\t]",word); scanf("%*c");
     
     btpos(root,ZSTART);
+    int dem = 0;
     
     while(bnxtky(root,a,&i) == 0) {
-        btsel(root, v, a, 1800, &rsize);
-        if(!strcmp(a,word)) {
-            printf("%s:\t%s\n", v, a);
+        btsel(root, a, v, 1800, &rsize);
+        // printf("%s\n",a);
+        if(strcmp(a,word) >= 0) {
+            printf("%s:\t%s\n", a, v);
             flag = 1;
+            break;
         }
+        // if(dem++ == 2) break;
     }
 
     if(!flag) printf("no number match!\n");
@@ -65,12 +74,14 @@ void searchByName(BTA *root) {
 
 int main() {
     BTA *root;
-
+    // getch();
+    // return 0;
     btinit();
 
     root = btcrt("vdic",0, FALSE);
     readFile(root);
     searchByName(root);
+    // print(root);
     btcls(root);
     return 0;
 }
