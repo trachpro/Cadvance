@@ -56,7 +56,7 @@ void filterWord(char *a) {
     int i = 0;
     int r = 2;
 
-    while('a' <= a[i] && a[i] <= 'z') {
+    while('a' <= a[i] && a[i] <= 'z' || a[i] == ' ') {
         i++;
     }
 
@@ -82,28 +82,31 @@ void searchByName(BTA *root) {
     char a[1800],v[1800];
     char word[15];
     int i, rsize, flag = 0;
-    mvprintw(x++,y,"enter the word: ");
+    mvprintw(1,y,"enter the word: ");
     
-    handleInput(word);
+    int type = handleInput(word);
 
     filterWord(word);
-    mvprintw(10,10,"%d",strlen(word));
-    
+
     btpos(root,ZSTART);
     int dem = 0;
     
     while(bnxtky(root,a,&i) == 0) {
         btsel(root, a, v, 1800, &rsize);
-        // printf("%s\n",a);
-        if(strcmp(a,word) == 0) {
-            mvprintw(x++,y,"%s:\t%s\n", a, v);
+
+        if(type == 1 && strcmp(a,word) == 0) {
+            mvprintw(2,y,"%s:\t%s\n", a, v);
             flag = 1;
             break;
         }
-        // if(dem++ == 2) break;
+        if(type == 2 && strcmp(a,word) >= 0) {
+            mvprintw(2,y,"%s:\t%s\n", a, v);
+            flag = 1;
+            break;
+        }
     }
 
-    // if(!flag) printf("no number match!\n");
+    if(!flag) mvprintw(1,0,"no number match!\n");
 }
 
 int createSdic(BTA *root, BTA *sdic) {
@@ -155,10 +158,41 @@ void findSuggestion(BTA *soundExTree, char *word) {
 		for (int i = 0; i < size; i++)
 		{
             // printf("%s\n",suggestion_str[i] );
-            mvprintw(2+i, 0,"%s\n", suggestion_str[i]);
+            mvprintw(2+i, 10,"%s\n", suggestion_str[i]);
 		}
 	}
 	else printf("No suggetion found\n");
+}
+
+void addNewWord(BTA *root, BTA *sdic) {
+    mvprintw(0,0,"input english word: ");
+
+    char word[15], mean[40];
+    char en[MAX_LEN_WORD];
+
+    handleInput(word);
+    filterWord(word);
+    mvprintw(2,0,"input meaning: ");
+
+    handleInput(mean);
+    filterWord(mean);
+    int x = btins(root, mean, word, 1800);
+    // btins(root, mean, word, 1800);
+
+    SoundEx(en, word, 4,1);
+    btins(sdic, word, en, 5 * sizeof(char));
+
+    if(x) {
+        mvprintw(4,0,"add fail: %s-%s",word, mean);
+    }
+}
+
+void menu() {
+    mvprintw(0,30,"my dictionary");
+    mvprintw(1,50,"menu");
+    mvprintw(2,50,"1.add new word");
+    mvprintw(3,50,"2.update word");
+    mvprintw(4,50,"3.delete word");   
 }
 
 
@@ -167,14 +201,51 @@ int main() {
     btinit();
 
     BTA *root = btopn("vdic.dat",0,0);
-	BTA *sdic =  btcrt("soundExTree.txt",0,0);
+	BTA *sdic =  btopn("soundExTree.dat",0,0);
     readFile(root);
     createSdic(root, sdic);
-    findSuggestion(sdic,"com");
-    // print(sdic,0,0);
+
+    char word[15];
+
+    char ls;
+    do {
+        mvprintw(0,30,"MY DICTIONARY");
+        mvprintw(1,40,"1.search");
+        mvprintw(2,40,"2.suggestion");
+        mvprintw(3,40,"0.exit");
+        ls = getch();
+        clear();
+
+        switch(ls) {
+            case '1': {
+                mvprintw(0,30,"SEARCH");
+                searchByName(root);
+                break;
+            }
+            case '2': {
+                mvprintw(0,30,"SUGGESTION");
+                move(1,0);
+
+                handleInput(word);
+                filterWord(word);
+                findSuggestion(sdic,word);
+                break;
+            }
+            case '0': break;
+            default: mvprintw(0,24,"WRONG OPTION! TRY AGAIN!"); break;
+        }
+
+        if(ls != '0') {
+            mvprintw(18,20,"press any key to return the menu!");
+            getch();
+            clear();
+        }
+
+    }while(ls!='0');
 
     btcls(root);
     btcls(sdic);
+    mvprintw(15,30,"BYE  BYE");
     getch();
     endwin();
     return 0;

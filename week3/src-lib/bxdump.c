@@ -33,8 +33,8 @@
 
 #define BYTELN 16
 
-#define TRUE 1
-#define FALSE 0
+// #define TRUE 1
+// #define FALSE 0
 
 static char *charset = 
 "................\

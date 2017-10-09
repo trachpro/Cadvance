@@ -53,8 +53,8 @@
 #include <setjmp.h>
 #include "btree.h"
 
-#define TRUE 1
-#define FALSE 0
+// #define TRUE 1
+// #define FALSE 0
 
 #if _FILE_OFFSET_BITS == 64
 #define ATOI atoll
