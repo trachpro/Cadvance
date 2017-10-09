@@ -15,4 +15,4 @@ phonebook:
 	gcc -o phonebook phonebook.c -L../lib -lbt -I../inc
 
 miti:
-	gcc -o mini miti.c -L../lib -lbt -I../inc
+	gcc -o mini miti.c -L../lib -lbt -lcurses -I../inc && ./mini
