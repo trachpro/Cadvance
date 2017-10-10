@@ -1,0 +1,6 @@
+#include "graphapi"
+
+int main()
+{
+  Graph g = create
+}
