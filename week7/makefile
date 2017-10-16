@@ -1,53 +1,58 @@
-# Libraries for fields, doubly-linked lists and red-black trees.
-# Copyright (C) 2001 James S. Plank
-# 
-# This library is free software; you can redistribute it and/or
-# modify it under the terms of the GNU Lesser General Public
-# License as published by the Free Software Foundation; either
-# version 2.1 of the License, or (at your option) any later version.
-# 
-# This library is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# Lesser General Public License for more details.
-# 
-# You should have received a copy of the GNU Lesser General Public
-# License along with this library; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-# 
-# ---------------------------------------------------------------------------
-# Please see http://www.cs.utk.edu/~plank/plank/classes/cs360/360/notes/Libfdr/
-# for instruction on how to use this library.
-# 
-# Jim Plank
-# plank@cs.utk.edu
-# http://www.cs.utk.edu/~plank
-# 
-# Associate Professor
-# Department of Computer Science
-# University of Tennessee
-# 203 Claxton Complex
-# 1122 Volunteer Blvd.
-# Knoxville, TN 37996-3450
-# 
-#      865-974-4397
-# Fax: 865-974-4404
+# project name (generate executable with this name)
+TARGET = main
+
+CC=gcc
+# compiling flags here
+CFLAGS= -g -Wall
+
+IDIR = ../../libs/libfdr
+# define any directories containing header file other then /usr/include
+INCLUDES = -I$(IDIR)
+
+# define any libraries to link into executable:
+# if I want to link in libraries
+# (libx.so or libx.a) I use the -llibname (-lx -lx) = (-lx)
+# libfdr => -lfdr
+LIBS = -lfdr 
+# LIBS = -lm
+
+# define any directories containing implementation of the file in INCLUDES
+# ../..lib means up 2 level then search for /lib
+LDIR = ../libfdr
+LFLAGS = -L$(LDIR)
+
+# This uses Suffix Replacement within a macro:
+#   $(name:string1=string2)
+# For each word in 'name' replace 'string1' with 'string2'
+# Below we are replacing the suffix .c of all words in the macro SRCS
+# with the .o suffix
+
+SRCS = $(wildcard *.c)
+ODIR = compileFile
+_OBJS = $(SRCS:.c=.o)
+OBJS = $(patsubst %,$(ODIR)/%,$(_OBJS))
+
+#_DEPS = fields.h jrb.h jval.h dllist.h
+#DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 
-CFLAGS = -O
+.PHONY: depend clean
+#action
+all: 	$(TARGET) 
 
-all: libfdr.a
+# This uses Suffix Replacement within a macro:
+#   $@ = left-part of ":" ( == $(TARGET))
+# 
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $^ $(LFLAGS) $(LIBS)
+	@echo "Linking complete!"
 
-OBJS = dllist.o fields.o jval.o jrb.o
-
-libfdr.a: $(OBJS)
-	ar ru libfdr.a $(OBJS)
-	ranlib libfdr.a 
+$(ODIR)/%.o: %.c $(DEPS)
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+	@echo "Compiled "$<" successfully!"
 
 clean:
-	rm -f core *.o libfdr.a
-
-.SUFFIXES: .c .o
-.c.o:
-	$(CC) $(CFLAGS) -c $*.c
-
+	rm -f $(ODIR)/*.o *~ $(TARGET)
+	@echo "Cleanup complete!"
+#depend: $(SRCS)
+#        makedepend $(INCLUDES) $^
